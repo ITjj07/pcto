@@ -48,12 +48,6 @@ def set_task(task, sim):
 # -------- TEST --------
 task = "fake task"
 
-
-
-
-
-
-# YOUR_TASKS = single_task
 # -------- TEST --------
 
 # ! ------------------------------------ Task code start ------------------------------------ ! #
