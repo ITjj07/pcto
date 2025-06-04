@@ -37,8 +37,8 @@ def set_task(task, sim):
 #
 # - The task sequence must be a dictionary (YOUR_DICT = {"KEY_NAME1": YOUR_TASK1, "KEY_NAME2": YOUR_TASK2, ...})
 #
-# - The last thing you should do before running the simulation is to set the number of tasks that should be executed and assign your taskS to "tasks"
-#   to the variable "tasks"
+# - The last thing you should do before running the simulation is to set the number of tasks that should be executed and assign your tasks (i.e. commands)
+#   to a variable that you'll call "tasks"
 # Usage:
 #       #num_tasks = NUMBER_OF_TASKS
 #       tasks = YOUR_DICT
@@ -46,15 +46,14 @@ def set_task(task, sim):
 # Have fun coding, fellas! :D
 
 # -------- TEST --------
+# DELETE THIS LINE WHEN YOUR CODE IS READY AND ASSIGN THE VARIABLE NAME "tasks" TO YOUR COMMAND DICT
 task = "fake task"
 
 # -------- TEST --------
 
 # ! ------------------------------------ Task code start ------------------------------------ ! #
 
-#single_task = {"single_task": [[[1.65,-0.4,-1.61,0.95,1.5,1.5], False]]}
-
-
+# WRITE YOUR CODE HERE
 
 # ! ------------------------------------ Task code end ------------------------------------ ! #
 
