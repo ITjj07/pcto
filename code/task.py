@@ -31,8 +31,10 @@ def set_task(task, sim):
 #       gripper_command = False --> command to close the gripper
 #
 # - Targets for the robot to reach and gripper commands have to be organized in a nested list fashion. For each subtask (target + gripper command), 
-#   put first the target for the robot and then the gripper command
+#   put first the target for the robot and then the gripper command; 
+# - The robot's target (i.e. how it is placed in the space) must be given in radiants - the robot has 6 joints, so 6 values must be given.
 # Example: 
+#       YOUR_TARGET = [joint1, joint2, joint3, joint4, joint5, joint6]  # where each joint is a float value in radiants
 #       YOUR_TASK = [[YOUR_TARGET1, gripper_command1], [YOUR_TARGET1, gripper_command2], ...]
 #
 # - The task sequence must be a dictionary (YOUR_DICT = {"KEY_NAME1": YOUR_TASK1, "KEY_NAME2": YOUR_TASK2, ...})
