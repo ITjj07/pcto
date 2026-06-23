@@ -1,0 +1,61 @@
+#python
+"""Paste this code into a CoppeliaSim Python script object.
+
+It receives the task dictionary published by task.py through CoppeliaSim 4.10's
+scene property signal API. Keep this file as .txt if you plan to paste it into
+CoppeliaSim rather than run it as a normal Python module.
+"""
+
+import pickle
+
+TASK_SIGNAL = 'signal.task'
+TASKS_OVER_SIGNAL = 'signal.tasks_over'
+
+
+def _load_tasks_from_scene():
+    raw_task = sim.getBufferProperty(sim.handle_scene, TASK_SIGNAL)
+    if raw_task is None:
+        raise RuntimeError('No task data was received. Run task.py before or while starting the simulation.')
+    return pickle.loads(raw_task)
+
+
+def sysCall_init():
+    global sim, tasks, current_task_names, current_task_index, current_subtask_index
+
+    sim = require('sim')
+    tasks = _load_tasks_from_scene()
+    current_task_names = list(tasks.keys())
+    current_task_index = 0
+    current_subtask_index = 0
+    sim.setBoolProperty(sim.handle_scene, TASKS_OVER_SIGNAL, False)
+    print(f'Received {len(current_task_names)} task(s) from ZeroMQ remote API client.')
+
+
+def _execute_subtask(joint_values, gripper_open):
+    # TODO: Replace these log lines with scene-specific robot/gripper commands,
+    # e.g. sim.setJointTargetPosition(...) for each UR joint and a gripper call.
+    print(f'Joint target (rad): {joint_values}; gripper_open={gripper_open}')
+
+
+def sysCall_actuation():
+    global current_task_index, current_subtask_index
+
+    if current_task_index >= len(current_task_names):
+        sim.setBoolProperty(sim.handle_scene, TASKS_OVER_SIGNAL, True)
+        return
+
+    task_name = current_task_names[current_task_index]
+    subtasks = tasks[task_name]
+
+    if current_subtask_index >= len(subtasks):
+        current_task_index += 1
+        current_subtask_index = 0
+        return
+
+    joint_values, gripper_open = subtasks[current_subtask_index]
+    _execute_subtask(joint_values, gripper_open)
+    current_subtask_index += 1
+
+
+def sysCall_cleanup():
+    sim.setBoolProperty(sim.handle_scene, TASKS_OVER_SIGNAL, True)
