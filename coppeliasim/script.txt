@@ -1,0 +1,101 @@
+import math 
+import time
+import pickle
+
+def sysCall_init():
+    sim = require('sim')
+    sim.setBoolProperty(sim.handle_scene, 'signal.tasks_over', False)
+
+# *********** FUNZIONE PER MUOVERE IL ROBOT *********** 
+def moveRobotJoints(targetConf):
+    
+    # Joint init
+    jointHandles = [None]*6
+    for i in range(6):
+        jointHandles[i] = sim.getObject("/joint", {"index":i})
+
+    vel = 50
+    accel = 10
+    jerk = 10
+    maxVel = [vel*math.pi/180,vel*math.pi/180,vel*math.pi/180,vel*math.pi/180,vel*math.pi/180,vel*math.pi/180]
+    maxAccel = [accel*math.pi/180,accel*math.pi/180,accel*math.pi/180,accel*math.pi/180,accel*math.pi/180,accel*math.pi/180]
+    maxJerk = [jerk*math.pi/180,jerk*math.pi/180,jerk*math.pi/180,jerk*math.pi/180,jerk*math.pi/180,jerk*math.pi/180]
+    
+    params = {
+        "joints": jointHandles,
+        "targetPos": targetConf,
+        "maxVel": maxVel,
+        "maxAccel": maxAccel,
+        "maxJerk": maxJerk}
+
+    result = sim.moveToConfig(params)
+    
+# *********** FUNZIONE PER APRIRE IL GRIPPER *********** 
+def openGripper():
+    
+    gripperHandle=sim.getObject('../openCloseJoint')
+    centerJoint=sim.getObject('../centerJoint')
+    motorVelocity=0.1 
+    motorForce=100
+    sim.setJointTargetForce(gripperHandle,motorForce)
+    sim.setJointTargetVelocity(gripperHandle,motorVelocity)
+    time.sleep(2)
+    
+    return
+    
+# *********** FUNZIONE PER CHIUDERE IL GRIPPER *********** 
+def closeGripper():
+
+    gripperHandle=sim.getObject('../openCloseJoint')
+    centerJoint=sim.getObject('../centerJoint')
+    motorVelocity=0.05 
+    motorForce=20
+    sim.setJointTargetForce(gripperHandle,motorForce)
+    sim.setJointTargetVelocity(gripperHandle,-motorVelocity)
+    time.sleep(2)
+    
+    return
+    
+# ********************* MAIN *************************
+def sysCall_thread():
+    # Store task signal from remote script
+    task_buffer = sim.getBufferProperty(sim.handle_scene, 'signal.task')
+    if task_buffer != None:
+        tasks = pickle.loads(task_buffer)
+        print("Task sequences received.")
+        for key, task in tasks.items():
+            print('\nTask name: ', key)
+            for idx, subtask in enumerate(task):
+                print(f'Target {idx}: {subtask[0]}')
+                print(f'Gripper open: {subtask[1]}\n')
+    else:
+        print("No task received.\n")
+        sim.stopSimulation()
+            
+    # Execute task
+    print('\nMotion started...')
+    for key, task in tasks.items():
+        print(f'\nExecuting task: {key}')
+        for idx, subtask in enumerate(task):
+            print(f'Reaching target {idx} at configuration {subtask[0]}')
+            moveRobotJoints(subtask[0])
+            if subtask[1] == True:
+                openGripper()
+            else:
+                closeGripper()
+    
+    # Send end of execution signal back to client
+    print('\nTasks finished.')
+    print('Sending tasks over signal back to client...\n\n')
+    sim.setBoolProperty(sim.handle_scene, 'signal.tasks_over', True)
+    
+    # Move robot
+    #openGripper()
+    #targetPos = [0,0.52,1.5,-0.4,-1.57,0]
+    #targetPos = [1.57,1.5,0,-0.4,-1.57,0]
+    #moveRobotJoints(targetPos)
+    #closeGripper()
+    #targetPos = [0,0,0,0,0,0]
+    #moveRobotJoints(targetPos)
+            
+    pass
